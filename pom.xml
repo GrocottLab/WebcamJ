@@ -12,31 +12,30 @@
 		<relativePath />
 	</parent>
 
-	<groupId>com.grocottlab</groupId>        <!-- FIXME: Your organization groupId here -->
+	<groupId>com.grocottlab</groupId> <!-- FIXME: Your organization groupId here -->
 	<artifactId>Webcam_J</artifactId> <!-- FIXME: Your project artifactId here   -->
 	<version>0.1.0-SNAPSHOT</version>
 
-	<name>WebcamJ</name>                                                   <!-- FIXME: Your project name here          -->
-	<description>A Maven project implementing an ImageJ 1.x plugin.</description> <!-- FIXME: Your project description here   -->
-	<url>https://mycompany.com/imagej/process-pixels/</url>                       <!-- FIXME: Your project website here       -->
-	<inceptionYear>2012</inceptionYear>                                           <!-- FIXME: Your project starting year here -->
+	<name>WebcamJ</name>                                         <!-- FIXME: Your project name here          -->
+	<description>Webcam plugin for ImageJ and Fiji</description> <!-- FIXME: Your project description here   -->
+	<url>https://mycompany.com/imagej/process-pixels/</url>      <!-- FIXME: Your project website here       -->
+	<inceptionYear>2023</inceptionYear>                          <!-- FIXME: Your project starting year here -->
 	<organization>
 		<name>Grocott Lab</name>           <!-- FIXME: Your organization name here    -->
 		<url>https://grocottlab.com/</url> <!-- FIXME: Your organization website here -->
 	</organization>
 	<licenses>
-		<license>                         <!-- FIXME: Your license here -->
-			<name>CC0</name>
-			<url>https://creativecommons.org/publicdomain/zero/1.0/</url>
-			<distribution>repo</distribution>
-		</license>
+            <license>
+                <name>GNU General Public License (GPL), Version 3.0</name>
+                <url>http://www.gnu.org/licenses/gpl-3.0.txt</url>
+            </license>
 	</licenses>
 
 	<developers>
 		<!-- See https://imagej.net/contribute/governance#scijava-team-roles -->
 		<developer>
-			<id>GrocottLab</id>                                          <!-- FIXME: Your GitHub handle here -->
-			<name>Timothy Grocott</name>                            <!-- FIXME: Your name here          -->
+			<id>GrocottLab</id>                <!-- FIXME: Your GitHub handle here -->
+			<name>Timothy Grocott</name>       <!-- FIXME: Your name here          -->
 			<url>https://grocottlab.com/</url> <!-- FIXME: Your website here       -->
 			<roles>
 				<role>founder</role>
@@ -77,22 +76,143 @@
 	</ciManagement>
 
 	<properties>
-		<package-name>com.grocottlab</package-name>                   <!-- FIXME: Your project package prefix here -->
-		<main-class>com.grocottlab.WebcamJ</main-class>        <!-- FIXME: Your project main class here, or delete for none -->
-		<license.licenseName>cc0</license.licenseName>                      <!-- FIXME: Your license-maven-plugin license code here -->
-		<license.copyrightOwners>Timothy Grocott</license.copyrightOwners> <!-- FIXME: Your organization legal entity name here -->
+		<package-name>com.grocottlab</package-name>                                              <!-- FIXME: Your project package prefix here -->
+		<main-class>com.grocottlab.WebcamJ</main-class>                                          <!-- FIXME: Your project main class here, or delete for none -->
+		<license.licenseName>GNU General Public License (GPL), Version 3.0</license.licenseName> <!-- FIXME: Your license-maven-plugin license code here -->
+		<license.copyrightOwners>Timothy Grocott</license.copyrightOwners>                       <!-- FIXME: Your organization legal entity name here -->
 	</properties>
 
 	<dependencies>
-		<dependency>
-			<groupId>net.imagej</groupId>
-			<artifactId>ij</artifactId>
-		</dependency>
-                
-                <dependency>
-                    <groupId>com.github.sarxos</groupId>
-                    <artifactId>webcam-capture</artifactId>
-                    <version>0.3.12</version>
-                </dependency>
+            <dependency>
+                <groupId>org.bytedeco</groupId>
+                <artifactId>javacv</artifactId>
+                <version>1.5.8</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>org.bytedeco</groupId>
+                <artifactId>openblas-platform</artifactId>
+                <version>0.3.21-1.5.8</version>
+                <!--<version>0.3.13-1.5.5</version>-->
+            </dependency>
+            
+            <dependency>
+                <groupId>org.bytedeco</groupId>
+                <artifactId>opencv-platform</artifactId>
+                <version>4.6.0-1.5.8</version>
+                <!--<version>4.5.1-1.5.5</version>-->
+            </dependency>
+            
+            <dependency>
+                    <groupId>net.imagej</groupId>
+                    <artifactId>ij</artifactId>
+            </dependency>
 	</dependencies>
+        
+        <!-- Copy binaries jar to Fiji plugins folder... -->
+        <build>
+            <plugins>
+                <!-- Exclude ImageJ/Fiji dependencies from jar... -->
+                <!-- Exclude Android/iOS javacv dependencies from jar... -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>3.2.2</version>
+                    <executions>
+                        <execution>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>shade</goal>
+                            </goals>
+                            <configuration>
+                                <!--<minimizeJar>true</minimizeJar>-->
+                                <artifactSet>
+                                    <excludes>
+                                        <exclude>net.imagej:*</exclude>
+                                        <exclude>org.bytedeco:opencv:jar:android*</exclude>
+                                        <exclude>org.bytedeco:opencv:jar:ios*</exclude>
+                                        <exclude>org.bytedeco:openblas:jar:android*</exclude>
+                                        <exclude>org.bytedeco:openblas:jar:ios*</exclude>
+                                        <exclude>org.bytedeco:javacpp:jar:android*</exclude>
+                                        <exclude>org.bytedeco:javacpp:jar:ios*</exclude>
+                                    </excludes>
+                                </artifactSet>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                
+                <!-- Make source jar... -->
+                
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <phase>prepare-package</phase>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                
+                <!-- Make javadocs jar... -->
+                <!--
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>2.7</version>
+                    <executions>
+                        <execution>
+                            <id>attach-javadoc</id>
+                            <phase>prepare-package</phase>
+                            <goals>
+                                <goal>javadoc</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                -->
+                
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>analyze</id> <!-- execution id used in Maven command -->
+                            <goals>
+                                <goal>analyze</goal>
+                            </goals>
+                            <configuration>
+                                <ignoreNonCompile>true</ignoreNonCompile>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                
+                <!-- Copy binaries jar to Fiji plugins folder... --><plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>copytoplugins</id>
+                            <phase>install</phase>
+                            <goals>
+                                <goal>run</goal>
+                            </goals>
+                            <configuration>
+                                <target>
+                                    <copy todir="/Applications/Fiji.app/plugins/" file="target/${project.build.finalName}.jar"/>
+                                </target>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </build>
+        
+        <reporting>
+        </reporting>
 </project>
